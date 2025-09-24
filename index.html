@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Pipeline | End-to-End Grounded AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Define theme variables */
+        :root {
+            --bg-dark: #0D1117;
+            --bg-card: #161B22;
+            --border-color: #30363d;
+            --accent-cyan: #22d3ee;
+            --accent-cyan-rgb: 34, 211, 238;
+            --accent-magenta: #f472b6;
+            --accent-magenta-rgb: 244, 114, 182;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+        }
+
+        /* Basic Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(200, 200, 200, 0.1) 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+
+        /* Futuristic Typography */
+        h1, h2, h3, h4, .font-futuristic {
+            font-family: 'Exo 2', sans-serif;
+            text-shadow: 0 0 5px rgba(var(--accent-cyan-rgb), 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        /* Card and Border styles */
+        .card-futuristic {
+            background-color: rgba(22, 27, 34, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .card-futuristic:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(var(--accent-cyan-rgb), 0.2);
+        }
+
+        /* Button styles */
+        .btn-futuristic {
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+        .btn-futuristic:hover {
+            background-color: rgba(var(--accent-cyan-rgb), 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(var(--accent-cyan-rgb), 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Input and Textarea styles */
+        .input-futuristic {
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .input-futuristic:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(var(--accent-cyan-rgb), 0.3);
+        }
+        
+        /* Code block styling */
+        pre[class*="language-"] {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
+        }
+        
+        /* Custom slider styles */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid var(--bg-dark);
+            box-shadow: 0 0 8px rgba(var(--accent-cyan-rgb), 0.5);
+        }
+
+        /* Architecture Diagram SVG Styling */
+        .arch-diagram .box {
+            fill: var(--bg-card);
+            stroke: var(--border-color);
+            stroke-width: 1;
+        }
+        .arch-diagram .label {
+            fill: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+        .arch-diagram .sublabel {
+            fill: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+        }
+        .arch-diagram .arrow-line {
+            stroke: var(--border-color);
+            stroke-width: 1.5;
+        }
+        .arch-diagram .arrow-head {
+            fill: var(--accent-cyan);
+        }
+        
+        /* Animation */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-white/10 backdrop-blur-lg">
+        <div class="max-w-7xl mx-auto flex items-center gap-4 px-4 h-16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.89 12.89 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+            <a href="#top" class="font-futuristic font-semibold text-lg">RAG Pipeline</a>
+            <nav class="hidden md:flex items-center gap-5 ml-8 text-sm">
+                <a href="#features" class="text-gray-400 hover:text-cyan-400 transition">Features</a>
+                <a href="#architecture" class="text-gray-400 hover:text-cyan-400 transition">Architecture</a>
+                <a href="#install" class="text-gray-400 hover:text-cyan-400 transition">Install</a>
+                <a href="#quickstart" class="text-gray-400 hover:text-cyan-400 transition">Quick Start</a>
+                <a href="#playground" class="text-gray-400 hover:text-cyan-400 transition">Playground</a>
+                <a href="#config" class="text-gray-400 hover:text-cyan-400 transition">Config</a>
+                <a href="#faq" class="text-gray-400 hover:text-cyan-400 transition">FAQ</a>
+            </nav>
+            <div class="ml-auto flex items-center gap-3">
+                 <div class="hidden md:flex items-center gap-2 rounded-lg border border-white/10 px-2 py-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 opacity-60"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input id="searchInput" placeholder="Search sections..." class="bg-transparent outline-none placeholder:text-gray-500 text-sm w-40"/>
+                </div>
+                <button id="theme-toggle" class="btn-futuristic inline-flex items-center justify-center rounded-lg p-2">
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero -->
+        <section id="top" class="py-20 md:py-28 border-b border-white/10 relative overflow-hidden">
+             <div class="absolute inset-0 bg-grid-cyan opacity-10"></div>
+             <div class="absolute top-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+             <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse animation-delay-400"></div>
+
+            <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center relative z-10">
+                <div class="fade-in-up">
+                    <h1 class="text-4xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-400">
+                        End-to-End RAG Pipeline
+                    </h1>
+                    <p class="text-lg mt-4 text-gray-400">
+                        Ground LLM answers in real documents to reduce hallucinations. Includes a Streamlit app, FAISS retrieval, and a comparison tool for grounded vs ungrounded responses.
+                    </p>
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <a href="#quickstart" class="btn-futuristic inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Quick Start
+                        </a>
+                        <a href="#playground" class="btn-futuristic inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold bg-cyan-400/10 text-cyan-300 border-cyan-400/50 hover:bg-cyan-400/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M18 6.2c-2.4 2.1-5.3 3.3-8.3 3.3.4-1.2.6-2.5.6-3.8 0-5.2-3.2-8.8-3.2-8.8S.5 3.1.5 8.3c0 2.5 1.2 5.3 3.3 8.3C6.2 18 3.3 21 3.3 21s8.8-3.2 8.8-3.2c1.3 0 2.6-.2 3.8-.6 5.2 0 8.8-3.2 8.8-3.2s-3.1-6.8-8.3-8.8Z"/></svg>
+                            Try Playground
+                        </a>
+                    </div>
+                </div>
+                <div class="fade-in-up" style="transition-delay: 150ms;">
+                    <div class="card-futuristic rounded-2xl p-4 shadow-2xl shadow-black/30">
+                        <div id="hero-diagram" class="w-full overflow-hidden">
+                            <!-- SVG Diagram will be injected here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="scroll-mt-20 py-16 md:py-24">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight fade-in-up">Everything you need, end to end.</h2>
+                    <p class="text-gray-400 mt-2 max-w-2xl mx-auto fade-in-up" style="transition-delay: 100ms;">
+                        A complete, modular, and configurable pipeline for building reliable, grounded AI applications.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                     <!-- Feature items will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Sections will be injected below -->
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-10">
+        <div class="max-w-7xl mx-auto px-4 text-sm text-gray-500 text-center">
+            <p>Made with ❤️ for grounded AI.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- ICON SVGs ---
+        const icons = {
+            shield: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+            layers: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.84l8.57 3.9a2 2 0 0 0 1.66 0l8.57-3.9a1 1 0 0 0 0-1.84Z"/><path d="m22 17.65-8.57 3.9a2 2 0 0 1-1.66 0L3.2 17.65"/><path d="m22 12.65-8.57 3.9a2 2 0 0 1-1.66 0L3.2 12.65"/></svg>`,
+            zap: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2z"/></svg>`,
+            fileUp: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>`,
+            settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
+            bookOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-cyan-400"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+            terminal: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>`,
+            gitBranch: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>`,
+            copy: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+            check: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-green-400"><polyline points="20 6 9 17 4 12"/></svg>`,
+            play: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+        };
+
+        // --- THEME TOGGLE ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-icon-sun');
+        const moonIcon = document.getElementById('theme-icon-moon');
+        const htmlEl = document.documentElement;
+
+        function updateThemeIcons(isDark) {
+            sunIcon.style.display = isDark ? 'block' : 'none';
+            moonIcon.style.display = isDark ? 'none' : 'block';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            htmlEl.classList.toggle('dark');
+            const isDark = htmlEl.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcons(isDark);
+        });
+        
+        // Load theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            htmlEl.classList.toggle('dark', savedTheme === 'dark');
+        }
+        updateThemeIcons(htmlEl.classList.contains('dark'));
+
+
+        // --- DYNAMIC CONTENT INJECTION ---
+        const mainContent = document.querySelector('main');
+        const featuresContainer = document.querySelector('#features .grid');
+
+        const featureData = [
+            { icon: icons.shield, title: "Reduced Hallucinations", desc: "Ground answers in retrieved chunks; refuse unsupported claims." },
+            { icon: icons.layers, title: "Modular Design", desc: "Swap embeddings, vector stores, and LLMs as needed." },
+            { icon: icons.zap, title: "FAISS Retrieval", desc: "Fast, scalable similarity search with top‑K control." },
+            { icon: icons.fileUp, title: "Upload UI", desc: "Drag-and-drop TXT/PDF/DOCX/MD via Streamlit demo." },
+            { icon: icons.settings, title: "Configurable", desc: "Tune chunk size/overlap, models, and retrieval params." },
+            { icon: icons.bookOpen, title: "Source Attribution", desc: "Show exactly which chunks support each answer." },
+        ];
+        
+        featureData.forEach((f, i) => {
+            featuresContainer.innerHTML += `
+                <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: ${i * 100}ms;">
+                    <div class="flex items-center gap-4">
+                        <div class="h-12 w-12 rounded-lg border border-white/10 inline-flex items-center justify-center bg-cyan-500/10">
+                            ${f.icon}
+                        </div>
+                        <h3 class="font-semibold text-lg font-futuristic">${f.title}</h3>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-3">${f.desc}</p>
+                </div>
+            `;
+        });
+        
+        const architectureSVG = `
+            <svg viewBox="0 0 920 420" class="w-full rounded-2xl arch-diagram">
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" class="arrow-head" />
+                </marker>
+              </defs>
+              <g>
+                <rect x="20" y="40" width="160" height="60" rx="12" class="box" /><text x="100" y="75" textAnchor="middle" class="label text-sm">Files: TXT/PDF</text>
+                <rect x="220" y="40" width="180" height="60" rx="12" class="box" /><text x="310" y="65" textAnchor="middle" class="label text-sm">Document Processor</text><text x="310" y="85" textAnchor="middle" class="sublabel text-xs">Chunking + Cleaning</text>
+                <rect x="440" y="40" width="180" height="60" rx="12" class="box" /><text x="530" y="65" textAnchor="middle" class="label text-sm">Embedding Generator</text><text x="530" y="85" textAnchor="middle" class="sublabel text-xs">sentence-transformers</text>
+                <rect x="660" y="40" width="180" height="60" rx="12" class="box" /><text x="750" y="65" textAnchor="middle" class="label text-sm">Vector Store</text><text x="750" y="85" textAnchor="middle" class="sublabel text-xs">FAISS</text>
+                <rect x="20" y="220" width="180" height="60" rx="12" class="box" /><text x="110" y="245" textAnchor="middle" class="label text-sm">User Question</text>
+                <rect x="240" y="220" width="160" height="60" rx="12" class="box" /><text x="320" y="245" textAnchor="middle" class="label text-sm">Retriever</text><text x="320" y="265" textAnchor="middle" class="sublabel text-xs">Top-K Similar</text>
+                <rect x="430" y="220" width="160" height="60" rx="12" class="box" /><text x="510" y="245" textAnchor="middle" class="label text-sm">Prompt Builder</text>
+                <rect x="620" y="220" width="160" height="60" rx="12" class="box" /><text x="700" y="245" textAnchor="middle" class="label text-sm">OpenAI GPT</text>
+                <rect x="810" y="220" width="90" height="60" rx="12" class="box" /><text x="855" y="255" textAnchor="middle" class="label text-sm">Answer</text>
+              </g>
+              <g class="arrow-line">
+                <line x1="180" y1="70" x2="220" y2="70" markerEnd="url(#arrow)" /><line x1="400" y1="70" x2="440" y2="70" markerEnd="url(#arrow)" /><line x1="620" y1="70" x2="660" y2="70" markerEnd="url(#arrow)" />
+                <line x1="200" y1="250" x2="240" y2="250" markerEnd="url(#arrow)" /><line x1="400" y1="250" x2="430" y2="250" markerEnd="url(#arrow)" /><line x1="590" y1="250" x2="620" y2="250" markerEnd="url(#arrow)" /><line x1="780" y1="250" x2="810" y2="250" markerEnd="url(#arrow)" />
+                <path d="M 320 220 C 320 160, 750 160, 750 100" stroke-dasharray="5,5" fill="none" marker-end="url(#arrow)" />
+                <path d="M 750 220 C 750 160, 320 160, 320 100" stroke-dasharray="5,5" fill="none" marker-end="url(#arrow)" />
+             </g>
+            </svg>
+        `;
+        document.getElementById('hero-diagram').innerHTML = architectureSVG;
+
+        const sections = [
+            {
+                id: 'architecture',
+                title: 'System Architecture',
+                subtitle: 'High-level flow from ingestion to grounded answers.',
+                content: `<div class="card-futuristic rounded-2xl p-4 shadow-2xl shadow-black/30 mt-12 fade-in-up"> ${architectureSVG} </div>`
+            },
+            {
+                id: 'install',
+                title: 'Installation',
+                subtitle: 'Create a virtualenv, install dependencies, and set your OpenAI key.',
+                content: `
+                    <div class="grid lg:grid-cols-3 gap-6 mt-12">
+                        <div class="card-futuristic rounded-xl p-6 fade-in-up">
+                            <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.terminal} 1) Virtual Environment</h3>
+                            <div class="code-block-container mt-4" data-code="python -m venv rag_env\n\n# On Windows\nrag_env\\Scripts\\activate\n\n# On macOS/Linux\nsource rag_env/bin/activate"></div>
+                        </div>
+                        <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 150ms;">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.settings} 2) Dependencies</h3>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <button class="dep-mode-btn font-semibold text-cyan-400" data-mode="req">requirements.txt</button>
+                                    <span class="text-gray-600">|</span>
+                                    <button class="dep-mode-btn text-gray-500" data-mode="pins">Pinned versions</button>
+                                </div>
+                            </div>
+                            <div id="deps-code-container" class="mt-4"></div>
+                        </div>
+                        <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 300ms;">
+                            <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.shield} 3) OpenAI API Key</h3>
+                            <p class="text-sm text-gray-400 mt-2">Create a <code>.env</code> file with the following:</p>
+                            <div class="code-block-container mt-4" data-code="OPENAI_API_KEY=your_api_key_here"></div>
+                        </div>
+                    </div>`
+            },
+            {
+                id: 'quickstart',
+                title: 'Quick Start',
+                subtitle: 'Launch the demo UI or run the CLI example.',
+                content: `
+                    <div class="grid md:grid-cols-2 gap-6 mt-12">
+                      <div class="card-futuristic rounded-xl p-6 fade-in-up">
+                        <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.play} Web Interface (Streamlit)</h3>
+                        <p class="text-sm text-gray-400 mt-2">Run the Streamlit app and open the shown URL (usually http://localhost:8501).</p>
+                        <div class="code-block-container mt-4" data-code="streamlit run demo_app.py"></div>
+                      </div>
+                      <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 150ms;">
+                        <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.terminal} Command Line</h3>
+                        <p class="text-sm text-gray-400 mt-2">Run a CLI demo to test the pipeline.</p>
+                        <div class="code-block-container mt-4" data-code="python main.py"></div>
+                      </div>
+                    </div>`
+            },
+            {
+                id: 'playground',
+                title: 'Interactive Playground',
+                subtitle: 'Try a mock of grounded vs ungrounded responses without any setup.',
+                content: `
+                    <div class="grid lg:grid-cols-3 gap-6 mt-12">
+                      <div class="lg:col-span-3 card-futuristic rounded-xl p-6 fade-in-up">
+                        <div class="grid md:grid-cols-3 gap-6">
+                          <div class="md:col-span-2">
+                            <label class="text-sm font-medium">Your question</label>
+                            <textarea id="playground-question" placeholder="e.g., What is RAG and how does it reduce hallucinations?" class="mt-2 w-full rounded-lg p-3 min-h-[120px] input-futuristic"></textarea>
+                          </div>
+                          <div>
+                            <label class="text-sm font-medium">Top-K Neighbors</label>
+                            <input type="range" min="1" max="8" value="4" class="mt-2 w-full" id="playground-topk-slider" />
+                            <div class="text-sm text-gray-400 mt-1">Top-K: <span id="playground-topk-value">4</span></div>
+                            <button id="playground-run-btn" class="mt-6 w-full btn-futuristic inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 font-semibold bg-cyan-400/10 text-cyan-300 border-cyan-400/50 hover:bg-cyan-400/20">
+                              ${icons.gitBranch} Get Grounded Response
+                            </button>
+                          </div>
+                        </div>
+                        <div id="playground-results" class="mt-6 grid md:grid-cols-2 gap-6 hidden"></div>
+                      </div>
+                    </div>`
+            },
+             {
+                id: 'config',
+                title: 'Live Configurator',
+                subtitle: 'Tune pipeline parameters and see the live configuration output.',
+                content: `
+                <div class="grid lg:grid-cols-3 gap-6 mt-12">
+                    <div class="lg:col-span-2 card-futuristic rounded-xl p-6 fade-in-up">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-sm font-medium">Chunk Size: <span id="chunk-size-value">800</span> tokens</label>
+                                <input id="chunk-size-slider" type="range" min="200" max="1800" value="800" class="w-full mt-2" />
+                            </div>
+                             <div>
+                                <label class="text-sm font-medium">Chunk Overlap: <span id="chunk-overlap-value">120</span> tokens</label>
+                                <input id="chunk-overlap-slider" type="range" min="0" max="400" value="120" class="w-full mt-2" />
+                            </div>
+                             <div>
+                                <label class="text-sm font-medium">Embedding Model</label>
+                                <input id="embed-model-input" value="sentence-transformers/all-MiniLM-L6-v2" class="input-futuristic mt-2 w-full rounded-lg p-2 text-sm" />
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium">LLM Model</label>
+                                <input id="llm-model-input" value="gpt-4o-mini" class="input-futuristic mt-2 w-full rounded-lg p-2 text-sm" />
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                           <h4 class="font-futuristic">Generated Config (config.py)</h4>
+                           <div id="config-code-output" class="code-block-container mt-2" data-lang="json"></div>
+                        </div>
+                    </div>
+                    <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 150ms;">
+                        <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.settings} Configuration Tips</h3>
+                        <ul class="mt-4 space-y-3 text-sm text-gray-400 list-disc list-inside">
+                           <li>Start with chunk size 700–1000 and overlap 100–150.</li>
+                           <li>Increase Top‑K when coverage seems low; decrease for speed.</li>
+                           <li>Pre-clean docs to remove headers/footers and duplicates.</li>
+                           <li>Keep temperature low (≤0.3) for grounded answers.</li>
+                        </ul>
+                    </div>
+                </div>`
+            },
+            {
+                id: 'faq',
+                title: 'Frequently Asked Questions',
+                subtitle: 'Common questions about the RAG pipeline.',
+                content: `<div class="space-y-4 mt-12 max-w-4xl mx-auto" id="faq-container"></div>`
+            }
+        ];
+
+        sections.forEach(section => {
+            mainContent.innerHTML += `
+                <section id="${section.id}" class="scroll-mt-20 py-16 md:py-24 border-t border-white/10">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <div class="text-center">
+                            <h2 class="text-3xl md:text-4xl font-bold tracking-tight fade-in-up">${section.title}</h2>
+                            <p class="text-gray-400 mt-2 max-w-2xl mx-auto fade-in-up" style="transition-delay: 100ms;">${section.subtitle}</p>
+                        </div>
+                        ${section.content}
+                    </div>
+                </section>
+            `;
+        });
+        
+        const faqData = [
+            { q: "Which file types are supported?", a: "Core processing supports <strong>TXT & PDF</strong>. The Streamlit uploader accepts TXT, PDF, DOCX, and MD; DOCX/MD rely on simple text extraction in the app." },
+            { q: "Do I need a GPU?", a: "No. CPU is fine for demos and small corpora. Embedding generation can benefit from a GPU but it’s optional." },
+            { q: "Can I swap models or vector stores?", a: "Yes. The design is modular—swap the embedding model, adjust FAISS params, or integrate a different store." },
+            { q: "What if I get OpenAI errors?", a: "Ensure <code>OPENAI_API_KEY</code> is set via <code>.env</code> or environment variable and you’re on a supported version." }
+        ];
+
+        const faqContainer = document.getElementById('faq-container');
+        faqData.forEach((item, i) => {
+            faqContainer.innerHTML += `
+                <details class="card-futuristic rounded-xl p-5 cursor-pointer fade-in-up" style="transition-delay: ${i*100}ms;">
+                    <summary class="font-semibold font-futuristic text-lg">${item.q}</summary>
+                    <div class="text-sm text-gray-400 mt-3">${item.a}</div>
+                </details>
+            `;
+        });
+
+
+        // --- CODE BLOCKS & COPY FUNCTIONALITY ---
+        function createCodeBlock(code, lang = 'bash') {
+            const container = document.createElement('div');
+            container.className = 'relative mt-3';
+            
+            const copyButton = document.createElement('button');
+            copyButton.className = 'absolute right-2 top-2 btn-futuristic inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs';
+            copyButton.innerHTML = `${icons.copy} <span>Copy</span>`;
+            
+            const pre = document.createElement('pre');
+            pre.className = 'overflow-x-auto rounded-xl p-4 text-sm leading-relaxed';
+            
+            const codeEl = document.createElement('code');
+            codeEl.className = `language-${lang}`;
+            codeEl.textContent = code;
+            
+            pre.appendChild(codeEl);
+            container.appendChild(copyButton);
+            container.appendChild(pre);
+
+            copyButton.addEventListener('click', () => {
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = code;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                try {
+                    document.execCommand('copy');
+                    copyButton.innerHTML = `${icons.check} <span>Copied</span>`;
+                    setTimeout(() => {
+                        copyButton.innerHTML = `${icons.copy} <span>Copy</span>`;
+                    }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+                document.body.removeChild(tempTextarea);
+            });
+            return container;
+        }
+
+        document.querySelectorAll('.code-block-container').forEach(el => {
+            const code = el.getAttribute('data-code');
+            const lang = el.getAttribute('data-lang') || 'bash';
+            el.appendChild(createCodeBlock(code, lang));
+        });
+        
+        
+        // --- INSTALLATION SECTION LOGIC ---
+        const depsReqCode = `pip install -r requirements.txt`;
+        const depsPinsCode = `pip install sentence-transformers==2.7.0\npip install openai==1.12.0\npip install streamlit==1.31.0\npip install pandas==2.2.0\npip install tqdm==4.66.0\npip install python-dotenv==1.0.1\npip install requests==2.31.0\n# PDF support\npip install PyPDF2==3.0.1`;
+        const depsContainer = document.getElementById('deps-code-container');
+        const depModeBtns = document.querySelectorAll('.dep-mode-btn');
+
+        function updateDepsCode(mode) {
+             depsContainer.innerHTML = ''; // Clear previous
+             const code = mode === 'req' ? depsReqCode : depsPinsCode;
+             depsContainer.appendChild(createCodeBlock(code));
+             depModeBtns.forEach(btn => {
+                if (btn.dataset.mode === mode) {
+                    btn.classList.add('font-semibold', 'text-cyan-400');
+                    btn.classList.remove('text-gray-500');
+                } else {
+                    btn.classList.remove('font-semibold', 'text-cyan-400');
+                    btn.classList.add('text-gray-500');
+                }
+             });
+        }
+        
+        depModeBtns.forEach(btn => btn.addEventListener('click', (e) => updateDepsCode(e.target.dataset.mode)));
+        updateDepsCode('req'); // Initial state
+
+        
+        // --- PLAYGROUND LOGIC ---
+        const topkSlider = document.getElementById('playground-topk-slider');
+        const topkValue = document.getElementById('playground-topk-value');
+        const runBtn = document.getElementById('playground-run-btn');
+        const resultsContainer = document.getElementById('playground-results');
+        const questionInput = document.getElementById('playground-question');
+
+        topkSlider.addEventListener('input', () => topkValue.textContent = topkSlider.value);
+
+        runBtn.addEventListener('click', () => {
+            const k = parseInt(topkSlider.value);
+            const question = questionInput.value || "(your question)";
+
+            const baseDocs = [
+                { title: "ai_basics.txt", chunk: "Chunk 1: ML overview and RAG intro." },
+                { title: "climate.pdf", chunk: "Chunk 2: Climate change mitigation strategies." },
+                { title: "renewables.md", chunk: "Chunk 3: Solar and wind efficiency comparisons." },
+                { title: "space.txt", chunk: "Chunk 4: Space exploration milestones." },
+                { title: "history.txt", chunk: "Chunk 5: Ancient civilizations and their impact." },
+                { title: "biology.pdf", chunk: "Chunk 6: Cellular respiration and photosynthesis." },
+                { title: "economics.md", chunk: "Chunk 7: Supply, demand, and market equilibrium." },
+                { title: "physics.txt", chunk: "Chunk 8: Einsteins theory of relativity explained." },
+            ];
+            
+            const chosenSources = baseDocs.slice(0, k);
+            const sourcesHTML = chosenSources.map(s => `
+                <li class="rounded-lg border border-white/10 p-3 bg-black/20">
+                    <div class="font-medium text-sm">${s.title}</div>
+                    <div class="text-gray-400 text-xs mt-1">${s.chunk}</div>
+                </li>
+            `).join('');
+
+            const groundedAnswer = `Based on ${k} retrieved chunk${k > 1 ? "s" : ""}, here is a grounded response for: "${question}".\n\nThis response cites the knowledge base and refuses claims that are not supported. Increasing Top-K can improve coverage.`;
+            const ungroundedAnswer = `This is an ungrounded response that does not cite sources. It might sound confident but could be factually incorrect or invent information—exactly what RAG aims to prevent.`;
+
+            resultsContainer.innerHTML = `
+                <div class="card-futuristic rounded-xl p-5 border-cyan-400/50">
+                    <h4 class="font-semibold mb-2 font-futuristic text-lg">Grounded Response</h4>
+                    <p class="text-sm whitespace-pre-wrap text-gray-300">${groundedAnswer}</p>
+                    <div class="mt-4">
+                        <h5 class="text-sm font-medium font-futuristic">Sources used (${k})</h5>
+                        <ul class="mt-2 space-y-2">${sourcesHTML}</ul>
+                    </div>
+                </div>
+                <div class="card-futuristic rounded-xl p-5 border-pink-400/50">
+                    <h4 class="font-semibold mb-2 font-futuristic text-lg">Ungrounded Response</h4>
+                    <p class="text-sm whitespace-pre-wrap text-gray-300">${ungroundedAnswer}</p>
+                </div>
+            `;
+            resultsContainer.classList.remove('hidden');
+        });
+
+        // --- CONFIGURATOR LOGIC ---
+        const configInputs = {
+            chunkSize: document.getElementById('chunk-size-slider'),
+            chunkOverlap: document.getElementById('chunk-overlap-slider'),
+            embedModel: document.getElementById('embed-model-input'),
+            llmModel: document.getElementById('llm-model-input')
+        };
+        const configValues = {
+            chunkSize: document.getElementById('chunk-size-value'),
+            chunkOverlap: document.getElementById('chunk-overlap-value'),
+        };
+        const configOutputContainer = document.getElementById('config-code-output');
+
+        function updateConfig() {
+            const config = {
+                chunk_size: parseInt(configInputs.chunkSize.value),
+                chunk_overlap: parseInt(configInputs.chunkOverlap.value),
+                embedding_model: configInputs.embedModel.value,
+                retrieval: { top_k: parseInt(topkSlider.value), metric: "cosine" }, // Use playground Top-K
+                llm: { model: configInputs.llmModel.value, temperature: 0.2, max_tokens: 600 },
+            };
+            
+            const codeString = JSON.stringify(config, null, 2);
+            configOutputContainer.innerHTML = '';
+            configOutputContainer.appendChild(createCodeBlock(codeString, 'json'));
+            
+            // Update value labels
+            if (configValues.chunkSize) configValues.chunkSize.textContent = config.chunk_size;
+            if (configValues.chunkOverlap) configValues.chunkOverlap.textContent = config.chunk_overlap;
+        }
+
+        Object.values(configInputs).forEach(input => input.addEventListener('input', updateConfig));
+        topkSlider.addEventListener('input', updateConfig); // Link playground slider
+        updateConfig(); // Initial call
+        
+        // --- SEARCH LOGIC ---
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.currentTarget.value.toLowerCase().trim();
+                if (!query) return;
+                const targetSection = document.querySelector(`section[id*="${query}"]`);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }
+        });
+
+        // --- SCROLL ANIMATION ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+        });
+
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+    });
+    </script>
+</body>
+</html>
