@@ -11,15 +11,27 @@
     <style>
         /* Define theme variables */
         :root {
-            --bg-dark: #0D1117;
+            --bg-main: #F9FAFB;
+            --bg-card: #FFFFFF;
+            --border-color: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --accent-cyan: #0891b2;
+            --accent-cyan-rgb: 8, 145, 178;
+            --accent-magenta: #be185d;
+            --accent-magenta-rgb: 190, 24, 93;
+        }
+
+        html.dark {
+            --bg-main: #0D1117;
             --bg-card: #161B22;
             --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
             --accent-cyan: #22d3ee;
             --accent-cyan-rgb: 34, 211, 238;
             --accent-magenta: #f472b6;
             --accent-magenta-rgb: 244, 114, 182;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
         }
 
         /* Basic Styles */
@@ -28,11 +40,10 @@
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-main);
             color: var(--text-primary);
             font-family: 'Inter', sans-serif;
-            background-image:
-                radial-gradient(circle at 1px 1px, rgba(200, 200, 200, 0.1) 1px, transparent 0);
+            background-image: radial-gradient(circle at 1px 1px, var(--border-color) 1px, transparent 0);
             background-size: 20px 20px;
         }
 
@@ -43,27 +54,20 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--bg-dark);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-cyan);
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
 
         /* Card and Border styles */
         .card-futuristic {
-            background-color: rgba(22, 27, 34, 0.8);
+            background-color: rgba(var(--bg-card-rgb, 22, 27, 34), 0.8);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
+        html.dark .card-futuristic { --bg-card-rgb: 22, 27, 34; }
+        html:not(.dark) .card-futuristic { --bg-card-rgb: 255, 255, 255; }
         .card-futuristic:hover {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 20px rgba(var(--accent-cyan-rgb), 0.2);
@@ -85,9 +89,10 @@
 
         /* Input and Textarea styles */
         .input-futuristic {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-main);
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            color: var(--text-primary);
         }
         .input-futuristic:focus {
             outline: none;
@@ -99,63 +104,58 @@
         pre[class*="language-"] {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
         }
         
         /* Custom slider styles */
         input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 4px;
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 4px;
             background: var(--border-color);
-            border-radius: 2px;
-            outline: none;
+            border-radius: 2px; outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px;
             background: var(--accent-cyan);
-            cursor: pointer;
-            border-radius: 50%;
-            border: 2px solid var(--bg-dark);
+            cursor: pointer; border-radius: 50%;
+            border: 2px solid var(--bg-card);
             box-shadow: 0 0 8px rgba(var(--accent-cyan-rgb), 0.5);
         }
 
         /* Architecture Diagram SVG Styling */
-        .arch-diagram .box {
-            fill: var(--bg-card);
-            stroke: var(--border-color);
-            stroke-width: 1;
-        }
-        .arch-diagram .label {
-            fill: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-        }
-        .arch-diagram .sublabel {
-            fill: var(--text-secondary);
-            font-family: 'Inter', sans-serif;
-        }
-        .arch-diagram .arrow-line {
-            stroke: var(--border-color);
-            stroke-width: 1.5;
-        }
-        .arch-diagram .arrow-head {
-            fill: var(--accent-cyan);
-        }
+        .arch-diagram .box { fill: var(--bg-card); stroke: var(--border-color); stroke-width: 1; }
+        .arch-diagram .label { fill: var(--text-primary); font-family: 'Inter', sans-serif; }
+        .arch-diagram .sublabel { fill: var(--text-secondary); font-family: 'Inter', sans-serif; }
+        .arch-diagram .arrow-line { stroke: var(--border-color); stroke-width: 1.5; }
+        .arch-diagram .arrow-head { fill: var(--accent-cyan); }
         
         /* Animation */
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        .fade-in-up { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* Chatbot Styles */
+        #chatbot-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000; }
+        #chatbot-toggle {
+            width: 4rem; height: 4rem; border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--accent-cyan); color: white;
+            box-shadow: 0 10px 15px -3px rgba(var(--accent-cyan-rgb), 0.4), 0 4px 6px -2px rgba(var(--accent-cyan-rgb), 0.2);
+            transition: all 0.3s ease;
         }
-        .fade-in-up.visible {
-            opacity: 1;
-            transform: translateY(0);
+        #chatbot-toggle:hover { transform: scale(1.1) rotate(15deg); box-shadow: 0 20px 25px -5px rgba(var(--accent-cyan-rgb),0.4), 0 10px 10px -5px rgba(var(--accent-cyan-rgb),0.2); }
+        #chatbot-window {
+            position: absolute; bottom: 5rem; right: 0;
+            width: 380px; height: 500px;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
         }
+        #chatbot-window.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #chat-messages { height: calc(100% - 110px); }
+        .chat-bubble { max-width: 80%; }
+        .chat-bubble-ai { background-color: var(--border-color); }
+        .chat-bubble-user { background-color: var(--accent-cyan); color: white; }
     </style>
 </head>
 <body class="antialiased">
@@ -173,6 +173,7 @@
                 <a href="#playground" class="text-gray-400 hover:text-cyan-400 transition">Playground</a>
                 <a href="#config" class="text-gray-400 hover:text-cyan-400 transition">Config</a>
                 <a href="#faq" class="text-gray-400 hover:text-cyan-400 transition">FAQ</a>
+                <a href="#about-us" class="text-gray-400 hover:text-cyan-400 transition">About Us</a>
             </nav>
             <div class="ml-auto flex items-center gap-3">
                  <div class="hidden md:flex items-center gap-2 rounded-lg border border-white/10 px-2 py-1.5">
@@ -248,6 +249,32 @@
             <p>Made by Nischal, Arham, Moseen, Yathish</p>
         </div>
     </footer>
+    
+    <!-- Chatbot -->
+    <div id="chatbot-container">
+        <div id="chatbot-window" class="card-futuristic rounded-2xl flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-[var(--border-color)] flex justify-between items-center">
+                <h4 class="font-futuristic text-lg">AI Assistant</h4>
+                <button id="chatbot-close" class="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">&times;</button>
+            </div>
+            <div id="chat-messages" class="flex-grow p-4 space-y-4 overflow-y-auto">
+                <!-- Messages will be injected here -->
+            </div>
+            <div class="p-4 border-t border-[var(--border-color)]">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="chat-input" placeholder="Ask a question..." class="input-futuristic w-full rounded-lg p-2 text-sm">
+                    <button id="chat-send" class="btn-futuristic rounded-lg p-2 bg-[var(--accent-cyan)] text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="chatbot-toggle">
+             <svg id="chatbot-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>
+             <svg id="chatbot-icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-8 w-8 hidden"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -285,10 +312,11 @@
             updateThemeIcons(isDark);
         });
         
-        // Load theme from localStorage
         const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            htmlEl.classList.toggle('dark', savedTheme === 'dark');
+        if (savedTheme === 'light') {
+             htmlEl.classList.remove('dark');
+        } else {
+            htmlEl.classList.add('dark');
         }
         updateThemeIcons(htmlEl.classList.contains('dark'));
 
@@ -296,7 +324,6 @@
         // --- DYNAMIC CONTENT INJECTION ---
         const mainContent = document.querySelector('main');
         const featuresContainer = document.querySelector('#features .grid');
-
         const featureData = [
             { icon: icons.shield, title: "Reduced Hallucinations", desc: "Ground answers in retrieved chunks; refuse unsupported claims." },
             { icon: icons.layers, title: "Modular Design", desc: "Swap embeddings, vector stores, and LLMs as needed." },
@@ -310,12 +337,12 @@
             featuresContainer.innerHTML += `
                 <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: ${i * 100}ms;">
                     <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 rounded-lg border border-white/10 inline-flex items-center justify-center bg-cyan-500/10">
+                        <div class="h-12 w-12 rounded-lg border border-[var(--border-color)] inline-flex items-center justify-center bg-cyan-500/10">
                             ${f.icon}
                         </div>
                         <h3 class="font-semibold text-lg font-futuristic">${f.title}</h3>
                     </div>
-                    <p class="text-sm text-gray-400 mt-3">${f.desc}</p>
+                    <p class="text-sm text-[var(--text-secondary)] mt-3">${f.desc}</p>
                 </div>
             `;
         });
@@ -347,7 +374,6 @@
             </svg>
         `;
         document.getElementById('hero-diagram').innerHTML = architectureSVG;
-
         const sections = [
             {
                 id: 'architecture',
@@ -378,7 +404,7 @@
                         </div>
                         <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 300ms;">
                             <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.shield} 3) OpenAI API Key</h3>
-                            <p class="text-sm text-gray-400 mt-2">Create a <code>.env</code> file with the following:</p>
+                            <p class="text-sm text-[var(--text-secondary)] mt-2">Create a <code>.env</code> file with the following:</p>
                             <div class="code-block-container mt-4" data-code="OPENAI_API_KEY=your_api_key_here"></div>
                         </div>
                     </div>`
@@ -391,12 +417,12 @@
                     <div class="grid md:grid-cols-2 gap-6 mt-12">
                       <div class="card-futuristic rounded-xl p-6 fade-in-up">
                         <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.play} Web Interface (Streamlit)</h3>
-                        <p class="text-sm text-gray-400 mt-2">Run the Streamlit app and open the shown URL (usually http://localhost:8501).</p>
+                        <p class="text-sm text-[var(--text-secondary)] mt-2">Run the Streamlit app and open the shown URL (usually http://localhost:8501).</p>
                         <div class="code-block-container mt-4" data-code="streamlit run demo_app.py"></div>
                       </div>
                       <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 150ms;">
                         <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.terminal} Command Line</h3>
-                        <p class="text-sm text-gray-400 mt-2">Run a CLI demo to test the pipeline.</p>
+                        <p class="text-sm text-[var(--text-secondary)] mt-2">Run a CLI demo to test the pipeline.</p>
                         <div class="code-block-container mt-4" data-code="python main.py"></div>
                       </div>
                     </div>`
@@ -416,7 +442,7 @@
                           <div>
                             <label class="text-sm font-medium">Top-K Neighbors</label>
                             <input type="range" min="1" max="8" value="4" class="mt-2 w-full" id="playground-topk-slider" />
-                            <div class="text-sm text-gray-400 mt-1">Top-K: <span id="playground-topk-value">4</span></div>
+                            <div class="text-sm text-[var(--text-secondary)] mt-1">Top-K: <span id="playground-topk-value">4</span></div>
                             <button id="playground-run-btn" class="mt-6 w-full btn-futuristic inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 font-semibold bg-cyan-400/10 text-cyan-300 border-cyan-400/50 hover:bg-cyan-400/20">
                               ${icons.gitBranch} Get Grounded Response
                             </button>
@@ -458,7 +484,7 @@
                     </div>
                     <div class="card-futuristic rounded-xl p-6 fade-in-up" style="transition-delay: 150ms;">
                         <h3 class="font-semibold flex items-center gap-2 font-futuristic text-lg">${icons.settings} Configuration Tips</h3>
-                        <ul class="mt-4 space-y-3 text-sm text-gray-400 list-disc list-inside">
+                        <ul class="mt-4 space-y-3 text-sm text-[var(--text-secondary)] list-disc list-inside">
                            <li>Start with chunk size 700–1000 and overlap 100–150.</li>
                            <li>Increase Top‑K when coverage seems low; decrease for speed.</li>
                            <li>Pre-clean docs to remove headers/footers and duplicates.</li>
@@ -472,16 +498,58 @@
                 title: 'Frequently Asked Questions',
                 subtitle: 'Common questions about the RAG pipeline.',
                 content: `<div class="space-y-4 mt-12 max-w-4xl mx-auto" id="faq-container"></div>`
+            },
+            {
+                id: 'about-us',
+                title: 'The Team',
+                subtitle: 'Meet the creators behind the RAG Pipeline project.',
+                content: `
+                    <div class="mt-12 max-w-4xl mx-auto fade-in-up" style="transition-delay: 200ms;">
+                        <div class="card-futuristic rounded-2xl overflow-hidden">
+                            <div class="p-6 bg-opacity-50">
+                                <h3 class="font-futuristic text-xl mb-4 text-cyan-400">Project Group 07</h3>
+                                <p class="text-md text-[var(--text-secondary)]"><strong class="font-semibold text-[var(--text-primary)]">Guided by:</strong> Prof. Adarsha S P, Assistant Professor</p>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead class="bg-white/5">
+                                        <tr>
+                                            <th class="p-4 font-semibold font-futuristic tracking-wider text-sm uppercase">Name</th>
+                                            <th class="p-4 font-semibold font-futuristic tracking-wider text-sm uppercase">USN</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-[var(--border-color)]">
+                                        <tr class="hover:bg-white/5 transition-colors">
+                                            <td class="p-4">Md Arham</td>
+                                            <td class="p-4 font-mono">1AY22CD027</td>
+                                        </tr>
+                                        <tr class="hover:bg-white/5 transition-colors">
+                                            <td class="p-4">Moseen K</td>
+                                            <td class="p-4 font-mono">1AY22CD030</td>
+                                        </tr>
+                                        <tr class="hover:bg-white/5 transition-colors">
+                                            <td class="p-4">Nischal P</td>
+                                            <td class="p-4 font-mono">1AY22CD032</td>
+                                        </tr>
+                                    <tr class="hover:bg-white/5 transition-colors">
+                                            <td class="p-4">Yathish S Naik</td>
+                                            <td class="p-4 font-mono">1AY22CD061</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `
             }
         ];
-
         sections.forEach(section => {
             mainContent.innerHTML += `
-                <section id="${section.id}" class="scroll-mt-20 py-16 md:py-24 border-t border-white/10">
+                <section id="${section.id}" class="scroll-mt-20 py-16 md:py-24 border-t border-[var(--border-color)]">
                     <div class="max-w-7xl mx-auto px-4">
                         <div class="text-center">
                             <h2 class="text-3xl md:text-4xl font-bold tracking-tight fade-in-up">${section.title}</h2>
-                            <p class="text-gray-400 mt-2 max-w-2xl mx-auto fade-in-up" style="transition-delay: 100ms;">${section.subtitle}</p>
+                            <p class="text-[var(--text-secondary)] mt-2 max-w-2xl mx-auto fade-in-up" style="transition-delay: 100ms;">${section.subtitle}</p>
                         </div>
                         ${section.content}
                     </div>
@@ -497,51 +565,40 @@
         ];
 
         const faqContainer = document.getElementById('faq-container');
-        faqData.forEach((item, i) => {
-            faqContainer.innerHTML += `
-                <details class="card-futuristic rounded-xl p-5 cursor-pointer fade-in-up" style="transition-delay: ${i*100}ms;">
-                    <summary class="font-semibold font-futuristic text-lg">${item.q}</summary>
-                    <div class="text-sm text-gray-400 mt-3">${item.a}</div>
-                </details>
-            `;
-        });
+        if (faqContainer) {
+            faqData.forEach((item, i) => {
+                faqContainer.innerHTML += `
+                    <details class="card-futuristic rounded-xl p-5 cursor-pointer fade-in-up" style="transition-delay: ${i*100}ms;">
+                        <summary class="font-semibold font-futuristic text-lg">${item.q}</summary>
+                        <div class="text-sm text-[var(--text-secondary)] mt-3">${item.a}</div>
+                    </details>
+                `;
+            });
+        }
 
 
-        // --- CODE BLOCKS & COPY FUNCTIONALITY ---
+        // --- CODE BLOCKS & COPY FUNCTIONALITY (No changes here) ---
         function createCodeBlock(code, lang = 'bash') {
             const container = document.createElement('div');
             container.className = 'relative mt-3';
-            
             const copyButton = document.createElement('button');
             copyButton.className = 'absolute right-2 top-2 btn-futuristic inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs';
             copyButton.innerHTML = `${icons.copy} <span>Copy</span>`;
-            
             const pre = document.createElement('pre');
             pre.className = 'overflow-x-auto rounded-xl p-4 text-sm leading-relaxed';
-            
             const codeEl = document.createElement('code');
             codeEl.className = `language-${lang}`;
             codeEl.textContent = code;
-            
             pre.appendChild(codeEl);
             container.appendChild(copyButton);
             container.appendChild(pre);
-
             copyButton.addEventListener('click', () => {
-                const tempTextarea = document.createElement('textarea');
-                tempTextarea.value = code;
-                document.body.appendChild(tempTextarea);
-                tempTextarea.select();
-                try {
-                    document.execCommand('copy');
+                navigator.clipboard.writeText(code).then(() => {
                     copyButton.innerHTML = `${icons.check} <span>Copied</span>`;
                     setTimeout(() => {
                         copyButton.innerHTML = `${icons.copy} <span>Copy</span>`;
                     }, 1500);
-                } catch (err) {
-                    console.error('Failed to copy text: ', err);
-                }
-                document.body.removeChild(tempTextarea);
+                });
             });
             return container;
         }
@@ -552,15 +609,15 @@
             el.appendChild(createCodeBlock(code, lang));
         });
         
-        
-        // --- INSTALLATION SECTION LOGIC ---
+        // --- INSTALLATION SECTION LOGIC (No changes here) ---
         const depsReqCode = `pip install -r requirements.txt`;
         const depsPinsCode = `pip install sentence-transformers==2.7.0\npip install openai==1.12.0\npip install streamlit==1.31.0\npip install pandas==2.2.0\npip install tqdm==4.66.0\npip install python-dotenv==1.0.1\npip install requests==2.31.0\n# PDF support\npip install PyPDF2==3.0.1`;
         const depsContainer = document.getElementById('deps-code-container');
         const depModeBtns = document.querySelectorAll('.dep-mode-btn');
 
         function updateDepsCode(mode) {
-             depsContainer.innerHTML = ''; // Clear previous
+             if (!depsContainer) return;
+             depsContainer.innerHTML = '';
              const code = mode === 'req' ? depsReqCode : depsPinsCode;
              depsContainer.appendChild(createCodeBlock(code));
              depModeBtns.forEach(btn => {
@@ -575,110 +632,68 @@
         }
         
         depModeBtns.forEach(btn => btn.addEventListener('click', (e) => updateDepsCode(e.target.dataset.mode)));
-        updateDepsCode('req'); // Initial state
+        updateDepsCode('req');
 
-        
-        // --- PLAYGROUND LOGIC ---
+        // --- PLAYGROUND LOGIC (No changes here) ---
         const topkSlider = document.getElementById('playground-topk-slider');
         const topkValue = document.getElementById('playground-topk-value');
         const runBtn = document.getElementById('playground-run-btn');
         const resultsContainer = document.getElementById('playground-results');
         const questionInput = document.getElementById('playground-question');
 
-        topkSlider.addEventListener('input', () => topkValue.textContent = topkSlider.value);
-
-        runBtn.addEventListener('click', () => {
+        if(topkSlider) topkSlider.addEventListener('input', () => topkValue.textContent = topkSlider.value);
+        if(runBtn) runBtn.addEventListener('click', () => {
             const k = parseInt(topkSlider.value);
             const question = questionInput.value || "(your question)";
-
             const baseDocs = [
-                { title: "ai_basics.txt", chunk: "Chunk 1: ML overview and RAG intro." },
-                { title: "climate.pdf", chunk: "Chunk 2: Climate change mitigation strategies." },
-                { title: "renewables.md", chunk: "Chunk 3: Solar and wind efficiency comparisons." },
-                { title: "space.txt", chunk: "Chunk 4: Space exploration milestones." },
-                { title: "history.txt", chunk: "Chunk 5: Ancient civilizations and their impact." },
-                { title: "biology.pdf", chunk: "Chunk 6: Cellular respiration and photosynthesis." },
-                { title: "economics.md", chunk: "Chunk 7: Supply, demand, and market equilibrium." },
-                { title: "physics.txt", chunk: "Chunk 8: Einsteins theory of relativity explained." },
+                { title: "ai_basics.txt", chunk: "Chunk 1: ML overview and RAG intro." }, { title: "climate.pdf", chunk: "Chunk 2: Climate change mitigation strategies." },
+                { title: "renewables.md", chunk: "Chunk 3: Solar and wind efficiency comparisons." }, { title: "space.txt", chunk: "Chunk 4: Space exploration milestones." },
+                { title: "history.txt", chunk: "Chunk 5: Ancient civilizations and their impact." }, { title: "biology.pdf", chunk: "Chunk 6: Cellular respiration and photosynthesis." },
+                { title: "economics.md", chunk: "Chunk 7: Supply, demand, and market equilibrium." }, { title: "physics.txt", chunk: "Chunk 8: Einsteins theory of relativity explained." },
             ];
             
             const chosenSources = baseDocs.slice(0, k);
-            const sourcesHTML = chosenSources.map(s => `
-                <li class="rounded-lg border border-white/10 p-3 bg-black/20">
-                    <div class="font-medium text-sm">${s.title}</div>
-                    <div class="text-gray-400 text-xs mt-1">${s.chunk}</div>
-                </li>
-            `).join('');
-
+            const sourcesHTML = chosenSources.map(s => `<li class="rounded-lg border border-white/10 p-3 bg-black/20"><div class="font-medium text-sm">${s.title}</div><div class="text-[var(--text-secondary)] text-xs mt-1">${s.chunk}</div></li>`).join('');
             const groundedAnswer = `Based on ${k} retrieved chunk${k > 1 ? "s" : ""}, here is a grounded response for: "${question}".\n\nThis response cites the knowledge base and refuses claims that are not supported. Increasing Top-K can improve coverage.`;
             const ungroundedAnswer = `This is an ungrounded response that does not cite sources. It might sound confident but could be factually incorrect or invent information—exactly what RAG aims to prevent.`;
 
-            resultsContainer.innerHTML = `
-                <div class="card-futuristic rounded-xl p-5 border-cyan-400/50">
-                    <h4 class="font-semibold mb-2 font-futuristic text-lg">Grounded Response</h4>
-                    <p class="text-sm whitespace-pre-wrap text-gray-300">${groundedAnswer}</p>
-                    <div class="mt-4">
-                        <h5 class="text-sm font-medium font-futuristic">Sources used (${k})</h5>
-                        <ul class="mt-2 space-y-2">${sourcesHTML}</ul>
-                    </div>
-                </div>
-                <div class="card-futuristic rounded-xl p-5 border-pink-400/50">
-                    <h4 class="font-semibold mb-2 font-futuristic text-lg">Ungrounded Response</h4>
-                    <p class="text-sm whitespace-pre-wrap text-gray-300">${ungroundedAnswer}</p>
-                </div>
-            `;
+            resultsContainer.innerHTML = `<div class="card-futuristic rounded-xl p-5 border-cyan-400/50"><h4 class="font-semibold mb-2 font-futuristic text-lg">Grounded Response</h4><p class="text-sm whitespace-pre-wrap text-[var(--text-primary)]">${groundedAnswer}</p><div class="mt-4"><h5 class="text-sm font-medium font-futuristic">Sources used (${k})</h5><ul class="mt-2 space-y-2">${sourcesHTML}</ul></div></div><div class="card-futuristic rounded-xl p-5 border-pink-400/50"><h4 class="font-semibold mb-2 font-futuristic text-lg">Ungrounded Response</h4><p class="text-sm whitespace-pre-wrap text-[var(--text-primary)]">${ungroundedAnswer}</p></div>`;
             resultsContainer.classList.remove('hidden');
         });
 
-        // --- CONFIGURATOR LOGIC ---
-        const configInputs = {
-            chunkSize: document.getElementById('chunk-size-slider'),
-            chunkOverlap: document.getElementById('chunk-overlap-slider'),
-            embedModel: document.getElementById('embed-model-input'),
-            llmModel: document.getElementById('llm-model-input')
-        };
-        const configValues = {
-            chunkSize: document.getElementById('chunk-size-value'),
-            chunkOverlap: document.getElementById('chunk-overlap-value'),
-        };
+        // --- CONFIGURATOR LOGIC (No changes here) ---
+        const configInputs = { chunkSize: document.getElementById('chunk-size-slider'), chunkOverlap: document.getElementById('chunk-overlap-slider'), embedModel: document.getElementById('embed-model-input'), llmModel: document.getElementById('llm-model-input') };
+        const configValues = { chunkSize: document.getElementById('chunk-size-value'), chunkOverlap: document.getElementById('chunk-overlap-value'), };
         const configOutputContainer = document.getElementById('config-code-output');
 
         function updateConfig() {
-            const config = {
-                chunk_size: parseInt(configInputs.chunkSize.value),
-                chunk_overlap: parseInt(configInputs.chunkOverlap.value),
-                embedding_model: configInputs.embedModel.value,
-                retrieval: { top_k: parseInt(topkSlider.value), metric: "cosine" }, // Use playground Top-K
-                llm: { model: configInputs.llmModel.value, temperature: 0.2, max_tokens: 600 },
-            };
-            
+            if (!configInputs.chunkSize) return; // Exit if not on the page
+            const config = { chunk_size: parseInt(configInputs.chunkSize.value), chunk_overlap: parseInt(configInputs.chunkOverlap.value), embedding_model: configInputs.embedModel.value, retrieval: { top_k: parseInt(topkSlider.value), metric: "cosine" }, llm: { model: configInputs.llmModel.value, temperature: 0.2, max_tokens: 600 }, };
             const codeString = JSON.stringify(config, null, 2);
             configOutputContainer.innerHTML = '';
             configOutputContainer.appendChild(createCodeBlock(codeString, 'json'));
-            
-            // Update value labels
             if (configValues.chunkSize) configValues.chunkSize.textContent = config.chunk_size;
             if (configValues.chunkOverlap) configValues.chunkOverlap.textContent = config.chunk_overlap;
         }
 
-        Object.values(configInputs).forEach(input => input.addEventListener('input', updateConfig));
-        topkSlider.addEventListener('input', updateConfig); // Link playground slider
-        updateConfig(); // Initial call
+        Object.values(configInputs).forEach(input => {
+            if(input) input.addEventListener('input', updateConfig)
+        });
+        if(topkSlider) topkSlider.addEventListener('input', updateConfig);
+        updateConfig();
         
-        // --- SEARCH LOGIC ---
+        // --- SEARCH LOGIC (No changes here) ---
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const query = e.currentTarget.value.toLowerCase().trim();
                 if (!query) return;
                 const targetSection = document.querySelector(`section[id*="${query}"]`);
-                if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                }
+                if (targetSection) targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
             }
         });
 
-        // --- SCROLL ANIMATION ---
+        // --- SCROLL ANIMATION (No changes here) ---
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -686,18 +701,70 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, {
-            threshold: 0.1,
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+        
+        // --- CHATBOT LOGIC ---
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const openIcon = document.getElementById('chatbot-icon-open');
+        const closeIcon = document.getElementById('chatbot-icon-close');
+
+        const toggleChatbot = (forceOpen = null) => {
+            const isOpen = chatbotWindow.classList.toggle('active', forceOpen);
+            openIcon.style.display = isOpen ? 'none' : 'block';
+            closeIcon.style.display = isOpen ? 'block' : 'none';
+        };
+
+        chatbotToggle.addEventListener('click', () => toggleChatbot());
+        chatbotClose.addEventListener('click', () => toggleChatbot(false));
+
+        const addMessage = (message, sender) => {
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble p-3 rounded-2xl w-fit ${sender === 'user' ? 'chat-bubble-user self-end' : 'chat-bubble-ai self-start'}`;
+            bubble.innerHTML = message; // Using innerHTML to render links
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+        
+        const getBotResponse = (userMessage) => {
+            const msg = userMessage.toLowerCase();
+            if (msg.includes('install')) {
+                return 'You can find installation instructions in the <a href="#install" class="underline">Installation section</a>. It involves creating a virtual environment and installing dependencies.';
+            } else if (msg.includes('feature')) {
+                 return 'The key features include reduced hallucinations, modular design, and a configurable pipeline. Check them out <a href="#features" class="underline">here</a>.';
+            } else if (msg.includes('hello') || msg.includes('hi')) {
+                return 'Hello there! How can I help you with the RAG Pipeline documentation?';
+            }
+            return "I'm a simple demo bot. For more complex questions, please refer to the documentation on this page. Try asking about 'features' or 'installation'.";
+        }
+
+        const handleSendMessage = () => {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            addMessage(message, 'user');
+            chatInput.value = '';
+            
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addMessage(response, 'ai');
+            }, 1000);
+        };
+
+        chatSend.addEventListener('click', handleSendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
         });
 
-        document.querySelectorAll('.fade-in-up').forEach(el => {
-            observer.observe(el);
-        });
+        // Initial bot message
+        addMessage("Hi! I'm a demo assistant for this page. Ask me about 'installation' or 'features' to see how I work.", 'ai');
 
     });
     </script>
 </body>
 </html>
-
-
 
